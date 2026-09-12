@@ -1,0 +1,34 @@
+// Purpose: Correlate failed authentication bursts with successful logins from the same source.
+let Failures =
+    SigninLogs
+    | where TimeGenerated > ago(24h)
+    | where ResultType != 0
+    | summarize
+        FailureCount = count(),
+        FirstFailure = min(TimeGenerated),
+        LastFailure = max(TimeGenerated)
+        by UserPrincipalName, IPAddress;
+let Successes =
+    SigninLogs
+    | where TimeGenerated > ago(24h)
+    | where ResultType == 0
+    | project
+        UserPrincipalName,
+        IPAddress,
+        SuccessTime = TimeGenerated,
+        Location,
+        AppDisplayName;
+Failures
+| join kind=inner Successes on UserPrincipalName, IPAddress
+| where SuccessTime >= LastFailure
+| where datetime_diff("minute", SuccessTime, LastFailure) <= 30
+| project
+    UserPrincipalName,
+    IPAddress,
+    FailureCount,
+    FirstFailure,
+    LastFailure,
+    SuccessTime,
+    Location,
+    AppDisplayName
+| order by FailureCount desc

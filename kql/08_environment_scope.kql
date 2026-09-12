@@ -1,0 +1,14 @@
+// Purpose: Scope a suspicious IP across the identity environment.
+let SuspiciousIP = "185.220.101.42";
+SigninLogs
+| where TimeGenerated > ago(7d)
+| where IPAddress == SuspiciousIP
+| summarize
+    Events = count(),
+    SuccessfulEvents = countif(ResultType == 0),
+    FailedEvents = countif(ResultType != 0),
+    FirstSeen = min(TimeGenerated),
+    LastSeen = max(TimeGenerated),
+    Applications = make_set(AppDisplayName, 20)
+    by UserPrincipalName, IPAddress
+| order by SuccessfulEvents desc, FailedEvents desc

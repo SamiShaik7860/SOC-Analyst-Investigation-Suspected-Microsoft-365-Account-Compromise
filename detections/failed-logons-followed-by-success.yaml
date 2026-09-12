@@ -1,0 +1,48 @@
+name: Failed Logons Followed by Success
+id: portfolio-failed-logons-followed-by-success
+status: experimental
+description: >
+  Detects repeated authentication failures followed by a successful login
+  from the same source IP and user within a short time window.
+author: Portfolio Project
+severity: high
+data_source:
+  table: SigninLogs
+mitre_attack:
+  tactics:
+    - Credential Access
+    - Initial Access
+  techniques:
+    - T1110
+    - T1078
+query: |
+  let Failures =
+      SigninLogs
+      | where TimeGenerated > ago(1h)
+      | where ResultType != 0
+      | summarize
+          FailureCount = count(),
+          LastFailure = max(TimeGenerated)
+          by UserPrincipalName, IPAddress;
+  let Successes =
+      SigninLogs
+      | where TimeGenerated > ago(1h)
+      | where ResultType == 0
+      | project UserPrincipalName, IPAddress, SuccessTime = TimeGenerated;
+  Failures
+  | join kind=inner Successes on UserPrincipalName, IPAddress
+  | where FailureCount >= 10
+  | where SuccessTime >= LastFailure
+  | where datetime_diff("minute", SuccessTime, LastFailure) <= 30
+false_positives:
+  - User repeatedly entered an incorrect password before eventually succeeding
+  - Shared NAT or proxy infrastructure
+  - Approved VPN infrastructure
+  - Automated application authentication errors
+analyst_validation:
+  - Validate IP reputation
+  - Review MFA result
+  - Compare with user baseline
+  - Check device compliance
+  - Review additional targeted users
+  - Pivot to endpoint telemetry

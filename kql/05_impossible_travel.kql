@@ -1,0 +1,37 @@
+// Purpose: Find rapid country changes for a user.
+// Note: This is a simplified hunt and should be validated against VPN/proxy infrastructure.
+SigninLogs
+| where TimeGenerated > ago(7d)
+| where ResultType == 0
+| where UserPrincipalName =~ "alex.johnson@contoso.com"
+| extend
+    Country = tostring(LocationDetails.countryOrRegion),
+    State = tostring(LocationDetails.state),
+    City = tostring(LocationDetails.city)
+| project
+    TimeGenerated,
+    UserPrincipalName,
+    IPAddress,
+    Country,
+    State,
+    City,
+    AppDisplayName
+| sort by TimeGenerated asc
+| serialize
+| extend
+    PreviousTime = prev(TimeGenerated),
+    PreviousCountry = prev(Country),
+    PreviousIP = prev(IPAddress)
+| extend MinutesSincePrevious = datetime_diff("minute", TimeGenerated, PreviousTime)
+| where isnotempty(PreviousCountry)
+| where Country != PreviousCountry
+| where MinutesSincePrevious between (0 .. 180)
+| project
+    PreviousTime,
+    TimeGenerated,
+    MinutesSincePrevious,
+    PreviousCountry,
+    Country,
+    PreviousIP,
+    IPAddress,
+    AppDisplayName

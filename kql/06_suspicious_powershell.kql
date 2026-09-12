@@ -1,0 +1,21 @@
+// Purpose: Hunt for potentially suspicious PowerShell usage.
+DeviceProcessEvents
+| where TimeGenerated > ago(24h)
+| where FileName in~ ("powershell.exe", "pwsh.exe")
+| where ProcessCommandLine has_any (
+    "-enc",
+    "-encodedcommand",
+    "FromBase64String",
+    "DownloadString",
+    "Invoke-WebRequest",
+    "IEX"
+)
+| project
+    TimeGenerated,
+    DeviceName,
+    AccountName,
+    FileName,
+    ProcessCommandLine,
+    InitiatingProcessFileName,
+    SHA1
+| order by TimeGenerated desc

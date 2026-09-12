@@ -1,0 +1,4 @@
+TimeGenerated,DeviceName,AccountName,FileName,ProcessCommandLine,InitiatingProcessFileName,SHA1
+2026-09-10T02:41:00Z,FIN-WS-044,alex,powershell.exe,powershell.exe -NoProfile -EncodedCommand SQBFAFgAIAAoAEcAZQB0AC0ARABhAHQAZQApAA==,explorer.exe,SIMULATEDSHA1A
+2026-09-10T02:42:10Z,FIN-WS-044,alex,cmd.exe,cmd.exe /c whoami,powershell.exe,SIMULATEDSHA1B
+2026-09-10T02:43:30Z,FIN-WS-044,alex,powershell.exe,powershell.exe -Command Get-Process,cmd.exe,SIMULATEDSHA1C

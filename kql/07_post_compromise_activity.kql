@@ -1,0 +1,24 @@
+// Purpose: Review high-risk process activity around a suspected compromise.
+DeviceProcessEvents
+| where TimeGenerated > ago(24h)
+| where AccountName has "alex"
+| where FileName in~ (
+    "powershell.exe",
+    "pwsh.exe",
+    "cmd.exe",
+    "wscript.exe",
+    "cscript.exe",
+    "mshta.exe",
+    "rundll32.exe",
+    "regsvr32.exe"
+)
+| project
+    TimeGenerated,
+    DeviceName,
+    AccountName,
+    FileName,
+    ProcessCommandLine,
+    InitiatingProcessFileName,
+    InitiatingProcessCommandLine,
+    SHA1
+| order by TimeGenerated asc

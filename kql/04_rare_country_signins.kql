@@ -1,0 +1,20 @@
+// Purpose: Identify countries rarely observed for each user.
+let Baseline =
+    SigninLogs
+    | where TimeGenerated between (ago(30d) .. ago(1d))
+    | where ResultType == 0
+    | extend Country = tostring(LocationDetails.countryOrRegion)
+    | summarize BaselineSignins = count() by UserPrincipalName, Country;
+SigninLogs
+| where TimeGenerated > ago(1d)
+| where ResultType == 0
+| extend Country = tostring(LocationDetails.countryOrRegion)
+| summarize
+    RecentSignins = count(),
+    FirstSeen = min(TimeGenerated),
+    LastSeen = max(TimeGenerated)
+    by UserPrincipalName, Country, IPAddress
+| join kind=leftouter Baseline on UserPrincipalName, Country
+| extend BaselineSignins = coalesce(BaselineSignins, 0)
+| where BaselineSignins <= 2
+| order by BaselineSignins asc, RecentSignins desc

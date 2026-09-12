@@ -1,0 +1,11 @@
+TimeGenerated,Event,AnalystInterpretation,Severity
+2026-09-10T01:48:00Z,Normal U.S. sign-in,Baseline,Low
+2026-09-10T02:14:00Z,Failed sign-ins begin,Possible credential attack,Medium
+2026-09-10T02:18:00Z,Failure count increases,Automated behavior likely,Medium
+2026-09-10T02:23:00Z,Successful login from suspicious IP,Potential account compromise,High
+2026-09-10T02:27:00Z,Unusual geography confirmed,Identity anomaly,High
+2026-09-10T02:41:00Z,Encoded PowerShell observed,Possible post-compromise execution,High
+2026-09-10T02:46:00Z,Incident escalated,High-confidence true positive,High
+2026-09-10T02:52:00Z,Sessions revoked,Identity containment,Response
+2026-09-10T02:55:00Z,Password reset initiated,Credential remediation,Response
+2026-09-10T03:02:00Z,Endpoint isolated,Host containment,Response
